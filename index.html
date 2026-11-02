@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Lab Hero: Biosafety Blitz</title>
+<meta name="description" content="A 3-minute interactive game that teaches the essential biosafety rules: PPE, waste sorting, spill response, lab hazards and BSL levels.">
+<style>
+:root{
+  --pink:#ff3d9a;--purple:#7a3cff;--blue:#18b6ff;--teal:#16e0b0;--lime:#b6ff3d;--yellow:#ffd23d;--orange:#ff8a3d;--red:#ff3d4a;
+  --ink:#1b1340;--glass:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#fff;overflow-x:hidden;
+  background:linear-gradient(120deg,#2a0a6e,#7a3cff,#ff3d9a,#18b6ff,#16e0b0,#2a0a6e);
+  background-size:400% 400%;animation:bgshift 18s ease infinite;
+  user-select:none;-webkit-user-select:none;touch-action:manipulation;
+}
+@keyframes bgshift{0%{background-position:0 50%}50%{background-position:100% 50%}100%{background-position:0 50%}}
+#bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+#bg i{position:absolute;bottom:-60px;font-style:normal;opacity:.35;animation:floatup linear infinite}
+@keyframes floatup{to{transform:translateY(-120vh) rotate(360deg)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50}
+#hud{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:12px 16px 0;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;font-weight:800}
+#hud[hidden]{display:none}
+.pill{background:var(--glass);backdrop-filter:blur(8px);border:2px solid rgba(255,255,255,.3);border-radius:99px;padding:6px 14px;font-size:15px;white-space:nowrap}
+#score{color:var(--yellow);display:inline-block}
+#score.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.4)}}
+#hearts{letter-spacing:2px}
+#hearts .lost{filter:grayscale(1);opacity:.35}
+#barwrap{flex-basis:100%;height:12px;background:rgba(0,0,0,.3);border-radius:9px;overflow:hidden}
+#bar{height:100%;width:100%;background:linear-gradient(90deg,var(--teal),var(--lime),var(--yellow));border-radius:9px}
+#bar.low{background:linear-gradient(90deg,var(--red),var(--orange));animation:pulse .5s infinite}
+@keyframes pulse{50%{opacity:.5}}
+#mute{cursor:pointer;background:var(--glass);border:2px solid rgba(255,255,255,.3);color:#fff;border-radius:99px;font-size:16px;padding:4px 10px}
+main{position:relative;z-index:2;max-width:900px;margin:0 auto;padding:12px 16px 40px}
+.card{background:linear-gradient(160deg,rgba(255,255,255,.22),rgba(255,255,255,.08));backdrop-filter:blur(10px);border:2px solid rgba(255,255,255,.35);border-radius:28px;padding:26px 22px;text-align:center;box-shadow:0 14px 50px rgba(20,0,60,.45);animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+h1{font-size:clamp(34px,8vw,64px);margin:6px 0;line-height:1.05;text-shadow:0 4px 0 rgba(0,0,0,.25);
+  background:linear-gradient(90deg,var(--yellow),var(--pink),var(--blue),var(--lime));background-size:300%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:bgshift 5s linear infinite}
+h2{margin:6px 0 8px;font-size:clamp(22px,5vw,34px);text-shadow:0 3px 0 rgba(0,0,0,.25)}
+p{font-size:clamp(15px,3.6vw,19px);line-height:1.45;margin:8px 0}
+.big{font-size:clamp(70px,18vw,120px);animation:bob 2s ease-in-out infinite;filter:drop-shadow(0 8px 12px rgba(0,0,0,.3))}
+@keyframes bob{50%{transform:translateY(-14px) rotate(6deg)}}
+.btn{font:inherit;font-weight:900;font-size:clamp(18px,4.5vw,24px);color:#fff;border:0;border-radius:99px;padding:14px 38px;margin-top:14px;cursor:pointer;
+  background:linear-gradient(135deg,var(--pink),var(--orange));box-shadow:0 6px 0 #a3125f,0 10px 25px rgba(0,0,0,.35);animation:glow 1.4s ease-in-out infinite;transition:transform .1s}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #a3125f}
+@keyframes glow{50%{transform:scale(1.07)}}
+.rule{background:rgba(0,0,0,.28);border-left:6px solid var(--lime);border-radius:14px;padding:10px 14px;text-align:left;margin:12px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.chips span{background:rgba(255,255,255,.18);border:2px solid rgba(255,255,255,.35);border-radius:99px;padding:5px 11px;font-size:14px;font-weight:700;animation:pop .5s backwards}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.flash{animation:flashr .4s}
+@keyframes flashr{0%{box-shadow:inset 0 0 0 100vmax rgba(255,0,40,.4)}}
+
+/* Round 1 */
+.strip{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.sci{font-size:54px;animation:bob 2.5s infinite}
+.slot{width:64px;height:64px;border-radius:18px;border:3px dashed rgba(255,255,255,.5);display:grid;place-items:center;font-size:32px;font-size:11px;font-weight:800;opacity:.85;position:relative}
+.slot b{font-size:30px;display:none}
+.slot.on{border:3px solid var(--lime);background:rgba(182,255,61,.28);opacity:1;animation:pop .5s}
+.slot.on b{display:block}.slot.on small{display:none}
+.rain{position:relative;height:min(58vh,440px);min-height:330px;border-radius:24px;overflow:hidden;background:rgba(0,0,0,.2);border:2px solid rgba(255,255,255,.3)}
+.fall{position:absolute;top:-80px;font-size:50px;background:none;border:0;cursor:pointer;animation:fall linear forwards;padding:4px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.4))}
+@keyframes fall{to{transform:translateY(var(--h)) rotate(300deg)}}
+.fall.gone{animation:poof .35s forwards!important}
+@keyframes poof{to{transform:scale(2.2) rotate(40deg);opacity:0}}
+
+/* Round 2 */
+.item{font-size:clamp(80px,22vw,130px);transition:transform .45s cubic-bezier(.5,-.4,.6,1),opacity .45s;animation:bob 1.6s infinite}
+.item.fly{transform:translate(var(--dx),var(--dy)) scale(.2) rotate(540deg)!important;opacity:0;animation:none}
+.iname{font-weight:900;font-size:clamp(18px,4.5vw,26px);background:rgba(0,0,0,.28);display:inline-block;padding:5px 18px;border-radius:99px;margin-bottom:12px;min-height:34px}
+.bins{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.bin{font:inherit;color:#fff;border:0;border-radius:20px;padding:12px 4px;font-weight:900;font-size:clamp(11px,2.8vw,15px);cursor:pointer;box-shadow:0 6px 0 rgba(0,0,0,.3);transition:transform .1s}
+.bin:active{transform:translateY(4px)}
+.bin em{display:block;font-style:normal;font-size:clamp(28px,8vw,44px)}
+.bin small{display:block;font-weight:600;opacity:.9;font-size:clamp(9px,2.2vw,12px)}
+.bin.hit{animation:bump .3s}
+
+/* Round 3 */
+.spillbox{font-size:clamp(50px,15vw,90px);height:130px;display:grid;place-items:center;transition:all .3s}
+.spillbox.pop{animation:pop .4s}
+.done{display:flex;flex-direction:column;gap:6px;margin:8px 0;text-align:left}
+.done div{background:rgba(22,224,176,.3);border:2px solid var(--teal);border-radius:14px;padding:7px 12px;font-weight:700;font-size:15px;animation:pop .4s}
+.opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.opt{font:inherit;font-weight:800;font-size:15px;color:#fff;border:0;border-radius:16px;padding:12px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.3);background:linear-gradient(135deg,var(--purple),var(--blue))}
+.opt:active{transform:translateY(4px)}
+
+/* Round 4 */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.hz{font:inherit;color:#fff;border:3px solid rgba(255,255,255,.4);border-radius:20px;padding:12px 8px;cursor:pointer;background:rgba(255,255,255,.14);animation:wob 3s ease-in-out infinite;transition:background .3s}
+.hz:nth-child(odd){animation-delay:-1.4s}
+@keyframes wob{50%{transform:translateY(-6px) rotate(-1.5deg)}}
+.hz em{display:block;font-style:normal;font-size:46px}
+.hz span{font-weight:700;font-size:13px}
+.hz.bad{background:rgba(255,61,74,.6);border-color:var(--red);animation:pop .4s}
+.hz.safe{background:rgba(22,224,176,.5);border-color:var(--teal);animation:pop .4s}
+.msg{min-height:50px;font-weight:800;font-size:16px;margin:10px 0 0;background:rgba(0,0,0,.28);border-radius:14px;padding:10px}
+
+/* Round 5 */
+.agent{display:inline-block;margin:6px 0 14px}
+.levels{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.lv{font:inherit;color:#fff;border:0;border-radius:18px;padding:12px 8px;cursor:pointer;font-weight:900;font-size:20px;box-shadow:0 6px 0 rgba(0,0,0,.3)}
+.lv:active{transform:translateY(4px)}
+.lv small{display:block;font-weight:600;font-size:12px;margin-top:3px;opacity:.95}
+.fl{position:fixed;font-weight:900;font-size:26px;color:var(--yellow);text-shadow:0 2px 0 #000;pointer-events:none;z-index:60;animation:flo 1s forwards}
+@keyframes flo{to{transform:translateY(-70px) scale(1.4);opacity:0}}
+.stars{font-size:48px;letter-spacing:6px}
+.stars span{display:inline-block;animation:starpop .6s backwards}
+@keyframes starpop{from{transform:scale(0) rotate(-200deg)}}
+footer{position:relative;z-index:2;text-align:center;font-size:12px;opacity:.7;padding-bottom:16px}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="fx"></canvas>
+<div id="hud" hidden>
+  <span class="pill" id="rd">Round 1/5</span>
+  <span class="pill">⭐ <span id="score">0</span></span>
+  <span class="pill" id="hearts"></span>
+  <button id="mute" title="Sound on/off" aria-label="Toggle sound">🔊</button>
+  <div id="barwrap"><div id="bar"></div></div>
+</div>
+<main id="stage"></main>
+<footer>Lab Hero: Biosafety Blitz · Always follow your own lab's official biosafety manual</footer>
+
+<script>
+const $=s=>document.querySelector(s), stage=$('#stage');
+const rnd=(a,b)=>a+Math.random()*(b-a), shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+const MAXLIVES=5, TOTAL=5;
+let score=0,lives=MAXLIVES,combo=0,dead=false,muted=false,tmr=null,cl=[];
+
+/* ---------- background microbes ---------- */
+(function(){const b=$('#bg'),e=['🦠','🧬','🧫','🔬','🧪','☣️','💧','🧼'];
+ for(let i=0;i<22;i++){const s=document.createElement('i');s.textContent=e[i%e.length];
+  s.style.cssText=`left:${rnd(0,100)}%;font-size:${rnd(18,52)}px;animation-duration:${rnd(9,22)}s;animation-delay:${-rnd(0,20)}s`;b.appendChild(s)}})();
+
+/* ---------- sound ---------- */
+let ac;
+function beep(f,d=.1,type='sine',v=.05){if(muted)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.value=v;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
+const sOk=()=>{beep(660);setTimeout(()=>beep(990),70)}, sNo=()=>beep(130,.3,'sawtooth',.07), sWin=()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.2),i*110));
+$('#mute').onclick=e=>{muted=!muted;e.target.textContent=muted?'🔇':'🔊'};
+
+/* ---------- confetti ---------- */
+const cv=$('#fx'),cx=cv.getContext('2d');let ps=[];
+function size(){cv.width=innerWidth;cv.height=innerHeight}size();addEventListener('resize',size);
+function burst(x,y,n=40){const c=['#ff3d9a','#ffd23d','#16e0b0','#18b6ff','#b6ff3d','#ff8a3d','#fff'];
+ for(let i=0;i<n;i++){const a=rnd(0,6.28),s=rnd(3,11);ps.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,r:rnd(4,9),c:c[i%7],l:1,rot:rnd(0,6)})}}
+(function loop(){cx.clearRect(0,0,cv.width,cv.height);ps=ps.filter(p=>p.l>0);
+ for(const p of ps){p.x+=p.vx;p.y+=p.vy;p.vy+=.28;p.vx*=.99;p.l-=.012;p.rot+=.2;cx.save();cx.globalAlpha=Math.max(p.l,0);cx.translate(p.x,p.y);cx.rotate(p.rot);cx.fillStyle=p.c;cx.fillRect(-p.r,-p.r/2,p.r*2,p.r);cx.restore()}
+ requestAnimationFrame(loop)})();
+function rain(n=120){for(let i=0;i<6;i++)setTimeout(()=>burst(rnd(0,innerWidth),rnd(0,innerHeight*.5),n/6),i*120)}
+
+/* ---------- HUD ---------- */
+function hud(){ $('#score').textContent=score; $('#hearts').innerHTML=Array.from({length:MAXLIVES},(_,i)=>`<span class="${i<lives?'':'lost'}">❤️</span>`).join('') }
+function floatTxt(t,x,y,col){const d=document.createElement('div');d.className='fl';d.textContent=t;if(col)d.style.color=col;d.style.left=(x-20)+'px';d.style.top=(y-20)+'px';document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
+function at(el){const r=el.getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}
+function good(base,x,y){combo++;const m=1+Math.min(combo-1,4)*.25,p=Math.round(base*m);score+=p;hud();const s=$('#score');s.classList.remove('bump');void s.offsetWidth;s.classList.add('bump');
+ floatTxt('+'+p+(combo>2?' 🔥x'+combo:''),x,y);burst(x,y,18);sOk()}
+function bad(x,y,txt='💔'){combo=0;lives--;hud();floatTxt(txt,x,y,'#ff6a7a');sNo();document.body.classList.remove('flash');void document.body.offsetWidth;document.body.classList.add('flash');
+ if(lives<=0)gameOver()}
+function shake(el){el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
+function stopTimer(){clearInterval(tmr);tmr=null}
+function clean(){stopTimer();cl.splice(0).forEach(f=>f())}
+function timer(sec,onEnd){stopTimer();const bar=$('#bar'),t0=performance.now();bar.classList.remove('low');bar.style.width='100%';
+ tmr=setInterval(()=>{const l=1-(performance.now()-t0)/(sec*1000);bar.style.width=Math.max(0,l*100)+'%';bar.classList.toggle('low',l<.25);if(l<=0){stopTimer();onEnd()}},80)}
+
+/* ---------- screens ---------- */
+function intro(n,icon,title,rule,cb){
+ clean();$('#hud').hidden=false;$('#rd').textContent=`Round ${n}/${TOTAL}`;$('#bar').style.width='100%';
+ stage.innerHTML=`<section class="card"><div class="big">${icon}</div><h2>Round ${n}: ${title}</h2><div class="rule">📘 <b>Biosafety rule:</b> ${rule}</div><button class="btn" id="go">GO! ▶</button></section>`;
+ $('#go').onclick=()=>{beep(600);cb()}}
+function outro(tip,next){
+ clean();$('#bar').style.width='0%';sWin();burst(innerWidth/2,innerHeight/3,70);
+ stage.innerHTML=`<section class="card"><div class="big">🎉</div><h2>Round clear!</h2><div class="rule">✅ ${tip}</div><button class="btn" id="nx">NEXT ▶</button></section>`;
+ $('#nx').onclick=()=>{beep(600);next()}}
+function round(finishFn){let over=false;return(msg)=>{if(over||dead)return;over=true;clean();finishFn(msg)}}
+
+/* ---------- START ---------- */
+function start(){
+ score=0;lives=MAXLIVES;combo=0;dead=false;hud();clean();$('#hud').hidden=true;
+ stage.innerHTML=`<section class="card">
+  <div class="big">🧑‍🔬</div><h1>Lab Hero</h1><h2>Biosafety Blitz</h2>
+  <p>5 super-fast rounds · about 3 minutes<br>Gear up 🥽 · Sort waste ☣️ · Beat a spill 🧴 · Spot hazards 🔍 · Match BSL levels 🔬</p>
+  <p>Tap fast, build combos 🔥, protect your ❤️ hearts!</p>
+  <button class="btn" id="st">START GAME</button></section>`;
+ $('#st').onclick=()=>{beep(500);$('#hud').hidden=false;hud();r1()}}
+
+/* ---------- ROUND 1: PPE catch ---------- */
+function r1(){
+ intro(1,'🥽','Gear Up!','Always wear PPE: lab coat, gloves, safety goggles, mask when needed and closed-toe shoes. No food, drinks or phones in the lab.',()=>{
+  const fin=round(()=>outro('PPE is your first barrier. Never eat, drink or use your phone in the lab.',r2));
+  const G=[['🥼','Lab coat'],['🧤','Gloves'],['🥽','Goggles'],['😷','Mask'],['👞','Closed shoes']],B=['🍔','🥤','📱','🩴','🍕','🎧'];
+  const got=new Set();
+  stage.innerHTML=`<div class="strip"><div class="sci" id="sci">🧑‍🔬</div>${G.map((g,i)=>`<div class="slot" id="s${i}"><b>${g[0]}</b><small>${g[1]}</small></div>`).join('')}</div>
+   <p style="text-align:center;margin:0 0 8px"><b>Tap the PPE ✅ — avoid food, drinks, phones & sandals ❌</b></p><div class="rain" id="rain"></div>`;
+  const R=$('#rain');
+  function spawn(){const miss=G.map((g,i)=>i).filter(i=>!got.has(i));
+   const isGood=Math.random()<.55&&miss.length||Math.random()<.2;let e,k;
+   if(isGood){k=miss.length&&Math.random()<.8?miss[Math.floor(rnd(0,miss.length))]:Math.floor(rnd(0,5));e=G[k][0]}else{e=B[Math.floor(rnd(0,B.length))]}
+   const b=document.createElement('button');b.className='fall';b.textContent=e;b.style.left=rnd(2,85)+'%';
+   b.style.setProperty('--h',(R.clientHeight+120)+'px');b.style.animationDuration=rnd(3,4.6)+'s';
+   b.onanimationend=()=>b.remove();
+   b.onpointerdown=ev=>{if(b.classList.contains('gone'))return;b.classList.add('gone');setTimeout(()=>b.remove(),350);
+    if(isGood){const s=$('#s'+k);if(!got.has(k)){got.add(k);s.classList.add('on');good(120,ev.clientX,ev.clientY);
+      const sc=$('#sci');sc.textContent=['🧑‍🔬','🧑‍🔬','🦸','🦸‍♂️','🦸','🦸‍♀️'][got.size]||'🦸';
+      if(got.size===5){burst(innerWidth/2,200,80);setTimeout(fin,900)}}else{good(10,ev.clientX,ev.clientY)}}
+    else{bad(ev.clientX,ev.clientY,'🚫 Not allowed!')}};
+   R.appendChild(b)}
+  const iv=setInterval(spawn,620);cl.push(()=>clearInterval(iv));spawn();
+  timer(32,fin)})}
+
+/* ---------- ROUND 2: waste sort ---------- */
+function r2(){
+ intro(2,'☣️','Waste Sorting','Segregate waste: contaminated material → red biohazard bag (autoclaved before disposal), needles & blades → sharps container (never recap!), broken glass → glass box, clean trash → general bin.',()=>{
+  const fin=round(()=>outro('Right bin, every time: biohazard (autoclave), sharps (never recap), glass box, general waste.',r3));
+  const bins=[['bio','☣️','Biohazard','red bag','#e8203a'],['sharp','💉','Sharps','yellow box','#d49a00'],['glass','🧊','Glass','blue box','#1d7bff'],['gen','🗑️','General','clean trash','#5c6b7a']];
+  const items=shuffle([['🧫','Used petri dish','bio'],['💉','Used needle','sharp'],['🥃','Broken glass','glass'],['🧻','Clean wrapper','gen'],['🧪','Culture tube','bio'],['🧤','Soiled gloves','bio'],['🔪','Scalpel blade','sharp'],['🍶','Cracked beaker','glass']]);
+  let i=0,lock=false;
+  stage.innerHTML=`<section class="card" style="padding:16px"><div class="iname" id="nm"></div><div><div class="item" id="it"></div></div>
+   <div class="bins">${bins.map((b,j)=>`<button class="bin" data-k="${b[0]}" style="background:${b[4]}"><em>${b[1]}</em>${j+1}. ${b[2]}<small>${b[3]}</small></button>`).join('')}</div></section>`;
+  function show(){if(i>=items.length)return setTimeout(fin,300);lock=false;const it=$('#it');it.className='item';it.style.cssText='';it.textContent=items[i][0];$('#nm').textContent=items[i][1]}
+  function pick(btn){if(lock||dead)return;const [x,y]=at(btn);
+   if(btn.dataset.k===items[i][2]){lock=true;good(100,x,y);btn.classList.remove('hit');void btn.offsetWidth;btn.classList.add('hit');
+    const it=$('#it'),a=at(it);it.style.setProperty('--dx',(x-a[0])+'px');it.style.setProperty('--dy',(y-a[1])+'px');it.classList.add('fly');
+    i++;setTimeout(show,480)}
+   else{shake($('#it'));bad(x,y,'Wrong bin!')}}
+  stage.querySelectorAll('.bin').forEach(b=>b.onclick=()=>pick(b));
+  const key=e=>{const n=+e.key;if(n>=1&&n<=4)pick(stage.querySelectorAll('.bin')[n-1])};addEventListener('keydown',key);cl.push(()=>removeEventListener('keydown',key));
+  show();timer(40,fin)})}
+
+/* ---------- ROUND 3: spill drill ---------- */
+function r3(){
+ intro(3,'🧴','Spill Drill!','Biological spill? Alert people, put on PPE, cover with paper towels, add disinfectant, wait 20 minutes, clean up into a biohazard bag, then wash hands and report it.',()=>{
+  const fin=round(()=>outro('Spill rule: Alert → PPE → Cover → Disinfect → Wait 20 min → Clean up → Wash & Report.',r4));
+  const steps=['📢 Alert others & keep people away','🥼 Put on gloves, coat & goggles','🧻 Cover the spill with paper towels','🧴 Pour disinfectant over it','⏱️ Wait 20 minutes contact time','🗑️ Clean up into a biohazard bag','🧼 Wash hands & report the incident'];
+  const vis=['🧪💥🟢','🚧🟢🚧','🧑‍🔬🥽🧤','🧻🟢','🧻💧','⏳20:00','🗑️☣️','✨🧼✨'];
+  let n=0;
+  stage.innerHTML=`<section class="card" style="padding:16px"><div class="spillbox" id="sp">${vis[0]}</div><div class="done" id="dn"></div><div class="opts" id="op"></div></section>`;
+  const op=$('#op');
+  shuffle(steps.map((s,i)=>[s,i])).forEach(([s,i])=>{const b=document.createElement('button');b.className='opt';b.textContent=s;
+   b.onclick=()=>{const [x,y]=at(b);
+    if(i===n){good(120,x,y);b.remove();const d=document.createElement('div');d.textContent=(n+1)+'. '+s;$('#dn').appendChild(d);n++;
+     const sp=$('#sp');sp.textContent=vis[n];sp.classList.remove('pop');void sp.offsetWidth;sp.classList.add('pop');
+     if(n===steps.length){burst(innerWidth/2,200,80);setTimeout(fin,900)}}
+    else{shake(b);bad(x,y,'Wrong order!')}};op.appendChild(b)});
+  timer(45,fin)})}
+
+/* ---------- ROUND 4: hazard hunt ---------- */
+function r4(){
+ intro(4,'🔍','Hazard Hunt','Keep the lab safe: no eating or drinking, never mouth-pipette, wear closed-toe shoes, never leave sharps out, label everything, keep phones out and doors closed. Wash hands, use the biosafety cabinet and know your eyewash.',()=>{
+  const fin=round(()=>outro('Label everything, close doors, no food/phones, never mouth-pipette, sharps in sharps bins, closed-toe shoes.',r5));
+  const H=[['🍔','Lunch at the bench','No food or drink in the lab!'],['👄','Pipetting by mouth','Never pipette by mouth. Use a pipette aid.'],['🩴','Sandals in the lab','Closed-toe shoes only.'],['💉','Needle left uncapped on bench','Sharps go straight into the sharps container. Never recap.'],['❓','Unlabeled tube','Label every sample: contents, date, name.'],['📱','Phone on the bench','Keep phones out of the lab.'],['🚪','Door propped open','Keep lab doors closed. Restrict access.']];
+  const S=[['🧼','Hand-wash sink','Wash hands after work and before leaving. Correct!'],['🌬️','Biosafety cabinet in use','Biosafety cabinets protect you and your samples. Correct!'],['🚿','Eyewash station','Know where the eyewash and shower are. Correct!'],['☣️','Biohazard sign on door','Warning signs show the hazard level. Correct!']];
+  let found=0;
+  stage.innerHTML=`<section class="card" style="padding:16px"><p style="margin:0 0 10px"><b>Tap the 7 UNSAFE things. Safe practices are traps! 🪤</b> <span class="pill" id="fd">0/7</span></p>
+   <div class="grid" id="gr"></div><div class="msg" id="ms">Look carefully… 👀</div></section>`;
+  shuffle([...H.map(h=>({h,b:1})),...S.map(h=>({h,b:0}))]).forEach(({h,b})=>{const c=document.createElement('button');c.className='hz';c.innerHTML=`<em>${h[0]}</em><span>${h[1]}</span>`;
+   c.onclick=()=>{if(c.dataset.d)return;c.dataset.d=1;const [x,y]=at(c);
+    if(b){c.classList.add('bad');c.querySelector('em').textContent='❌';found++;$('#fd').textContent=found+'/7';$('#ms').textContent='✅ '+h[2];good(120,x,y);if(found===7){burst(innerWidth/2,200,80);setTimeout(fin,1100)}}
+    else{c.classList.add('safe');$('#ms').textContent='🛡️ '+h[2]+' (that was safe!)';score=Math.max(0,score-50);hud();combo=0;floatTxt('-50',x,y,'#ff6a7a');sNo()}};
+   $('#gr').appendChild(c)});
+  timer(40,fin)})}
+
+/* ---------- ROUND 5: BSL match ---------- */
+function r5(){
+ intro(5,'🔬','BSL Showdown','Biosafety Levels: BSL-1 harmless germs · BSL-2 moderate risks (biosafety cabinet, restricted access) · BSL-3 airborne, serious disease (special airflow, respirators) · BSL-4 deadly, no cure (full-body suit).',()=>{
+  const fin=round(()=>end(true));
+  const L=[['#2fbf5b','BSL-1','Basic'],['#e0b400','BSL-2','Cabinet + limited access'],['#ff7a2f','BSL-3','Airflow + respirator'],['#e8203a','BSL-4','Full-body suit']];
+  const Q=shuffle([['🧫','Harmless lab E. coli',0],['🥚','Salmonella',1],['🤧','Influenza virus',1],['🫁','Tuberculosis bacteria',2],['🩸','Ebola virus',3]]);
+  let i=0;
+  stage.innerHTML=`<section class="card" style="padding:16px"><p style="margin:0"><b>Which biosafety level does it need?</b></p><div class="agent"><div class="big" id="ag" style="font-size:clamp(70px,16vw,110px)"></div><div class="iname" id="an"></div></div>
+   <div class="levels">${L.map((l,j)=>`<button class="lv" data-j="${j}" style="background:${l[0]}">${l[1]}<small>${l[2]}</small></button>`).join('')}</div></section>`;
+  function show(){if(i>=Q.length){burst(innerWidth/2,200,80);return setTimeout(fin,700)}$('#ag').textContent=Q[i][0];$('#an').textContent=Q[i][1]}
+  stage.querySelectorAll('.lv').forEach(b=>b.onclick=()=>{const [x,y]=at(b);
+   if(+b.dataset.j===Q[i][2]){good(150,x,y);i++;const a=$('#ag');a.style.animation='none';void a.offsetWidth;a.style.animation='';show()}
+   else{shake($('#ag'));bad(x,y,'Higher or lower?')}});
+  show();timer(35,fin)})}
+
+/* ---------- END ---------- */
+const RULES=['🧤 Wear PPE','🍔 No food / drink / phones','🧼 Wash hands','☣️ Sort biohazard waste','💉 Sharps bin, never recap','🔥 Autoclave waste','🧴 Disinfect surfaces','🏷️ Label everything','🚪 Keep doors closed','🌬️ Use biosafety cabinet','👄 Never mouth-pipette','🚿 Know eyewash & shower','🧯 Clean spills correctly','📢 Report incidents','🔬 Know your BSL'];
+function gameOver(){dead=true;clean();end(false)}
+function end(win){
+ clean();$('#bar').style.width='0%';
+ const st=!win?0:lives>=4?3:lives>=2?2:1,title=!win?'Contamination! 😵':['','Rookie Scientist 🔬','Lab Pro 🧑‍🔬','BIOSAFETY HERO 🦸'][st];
+ if(win){sWin();rain(160)}else sNo();
+ stage.innerHTML=`<section class="card"><div class="big">${win?'🏆':'🦠'}</div><h2>${title}</h2>
+  ${win?`<div class="stars">${[1,2,3].map(n=>`<span style="animation-delay:${n*.25}s">${n<=st?'⭐':'☆'}</span>`).join('')}</div>`:'<p>You ran out of hearts. Review the rules and try again!</p>'}
+  <p style="font-size:26px;font-weight:900;color:var(--yellow)">Score: ${score}</p>
+  <p><b>Biosafety rules you practised:</b></p><div class="chips">${RULES.map((r,i)=>`<span style="animation-delay:${i*.07}s">${r}</span>`).join('')}</div>
+  <button class="btn" id="again">PLAY AGAIN 🔁</button></section>`;
+ $('#again').onclick=start}
+
+start();
+</script>
+</body>
+</html>
